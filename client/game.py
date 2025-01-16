@@ -26,15 +26,21 @@ for j in range(dY):
 
 #open button
 def select_file():
-    filetypes = (('text files', '*.txt'),('All files', '*.*'))
+    filetypes = (('image files', '*.png'),('All files', '*.*'))
     filename = fd.askopenfilename(title='Open a file', initialdir='/', filetypes=filetypes)
  
     showinfo(title='Selected File', message=filename)
+    show_preview(filename)
+
+def show_preview(filename):
+    image_preview = tk.PhotoImage(file=filename)
+    label = tk.Label(screen, image=image_preview)
+    label.image = image_preview
+    label.pack()
+
 
 open_btn = tk.Button(screen, text="open a file", command=select_file)
 open_btn.pack()
-
-
 canva.pack()
 
 
