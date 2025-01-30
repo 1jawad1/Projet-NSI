@@ -1,101 +1,102 @@
 import tkinter as tk
 from tkinter import filedialog as fd  #boite dialogue pour ouvrir un fichier
 from tkinter.messagebox import showinfo
+
+from PIL import Image, ImageTk, ImageOps
+
 import time
+import Canva
 
 screen = tk.Tk()
 screen.geometry("1000x700")
 
 #--------------------------------------------------------------------------------
 
-dX = 25
-dY = 20
-pixel_size = 20
 
-canva_X = dX * pixel_size + dX-1
-canva_Y = dY * pixel_size + dY-1
-
-canva = tk.Canvas(screen, width = canva_X , height = canva_Y, bg='white', highlightbackground='black', highlightcolor='black')
-
-n_x = 1
-n_y = 1
-
-#les lignes verticales pour le cadrillage
-
-for i in range(pixel_size, canva_X-dX+1, pixel_size):
-        canva.create_line(i+n_x, 0, i+n_x, canva_Y+1 , fill='black', width = 1)
-        n_x+=1
-    
-# #les lignes horizontales pour le cadrillage
-
-for i in range(pixel_size, canva_Y-dY+1, pixel_size):
-        canva.create_line(0, i+n_y, canva_X+1,  i+n_y, fill='black', width = 1)
-        n_y+=1
-    
-
-#recupère le pixel
-
-def getPixelCoords(x, y):
-
-    x_ = (x//(pixel_size+1))*(pixel_size+1) 
-    coords_x = (x_, x_+pixel_size) 
-
-    y_ = (y//(pixel_size+1))*(pixel_size+1) 
-    coords_y = (y_, y_+pixel_size) 
-
-    return (coords_x, coords_y)
-
-#colorie la case 
-current_color = 'black'
-
-#petit bug avec les pixels de la première colonne, il ne s'éfface pas et on peut en replacer un au dessus 
-
-def fillPixel(e):
-    global current_color
-    coords_x, coords_y  = getPixelCoords(e.x, e.y)
-
-    pixel_coords = (coords_x[0]+1, coords_y[0]+1, coords_x[1]+1, coords_y[1]+1)
-    pixel_tag = f"{coords_x[0]}x{coords_y[0]}"
-
-    match e.type:
-         
-        case '6':
-            if not canva.find_withtag('hover'):
-                canva.create_rectangle(*pixel_coords, fill='#e0e0e0', tags='hover', width=0)
-                canva.tag_bind('hover', '<Leave>', lambda e: canva.delete('hover'))
-
-        case '4':
-            if e.num == 1 and not canva.find_withtag(pixel_tag) :
-                canva.create_rectangle( *pixel_coords, fill=current_color, tags=(current_color, pixel_tag), width=0)
-                current_color = 'red'
-
-            elif e.num == 3 and canva.find_withtag(pixel_tag):
-                canva.delete(pixel_tag)
+canva = False
 
 
+#palette de couleurs
 
-canva.bind('<Motion>', fillPixel)
-canva.bind("<Button-1>", fillPixel)
-canva.bind("<Button-3>", fillPixel)
+colors = ["black", "#ffe2c3", "red", "#f57de7", "#9329ce", "#0821b3","#35c729", "#62d4ed", "#839845", "#5c6c86"]
+
+color_buttons_frame = tk.Frame(screen)
+color_buttons_frame.grid(column=1, row=5, columnspan=4, pady=20)
+
+def create_color_button(color):
+        button = tk.Canvas(color_buttons_frame, width=30, height=30, bg=screen.cget("bg"), highlightthickness=0)
+        button.create_oval(2, 2, 28, 28, fill=color, outline=color)
+        button.bind("<Button-1>", lambda event, c=color: canva.select_color(c))
+        button.pack(side="left", padx=5)
+
+for color in colors:
+    create_color_button(color)
+
 
 #open button
+
+current_image = None
+label = tk.Label(screen, text="No image selected")
+
 def select_file():
     filetypes = (('image files', '*.png'),('All files', '*.*'))
     filename = fd.askopenfilename(title='Open a file', initialdir='/', filetypes=filetypes)
  
     showinfo(title='Selected File', message=filename)
-    show_preview(filename)
+    editImage(filename, 50)
 
-def show_preview(filename):
-    image_preview = tk.PhotoImage(file=filename)
-    label = tk.Label(screen, image=image_preview)
-    label.image = image_preview
-    label.pack()
+def editImage(filename, w):
+    global current_image
+    image = Image.open(filename)
+
+    width, height = image.size
+    ratio = width / height
+
+    image = image.resize((w, round(w/ratio)), Image.NEAREST)
+    image = image.resize((200, round(200/ratio)), Image.NEAREST)
+    image = image.quantize(colors=10, method=Image.Quantize.FASTOCTREE)
+
+
+
+    current_image = ImageTk.PhotoImage(image)
+    show_preview(current_image, w, round(w/ratio))
+
+
+def show_preview(image, w, h):
+
+    label.config(image=image)
+    
+    global canva
+
+    if(canva): canva.canva.destroy()
+    
+    ecran = tk.Canvas(screen)
+    canva = Canva.Canva(w, h, 10, ecran)
+
+    canva.draw()
+
+    canva.canva.bind('<Motion>', canva.fillPixel)
+    canva.canva.bind("<Button-1>", canva.fillPixel)
+    canva.canva.bind("<Button-3>", canva.fillPixel)
+    
+    canva.canva.grid(column=1, row=2, columnspan=3, rowspan=3, padx=25)
 
 
 open_btn = tk.Button(screen, text="open a file", command=select_file)
-open_btn.pack()
-canva.pack()
 
+title = tk.Label(screen, text='PIxelSolo', font=("Arial", 25, "bold"))
 
+# les .pack() ici : 
+title.grid(column=1, row=1, columnspan=4, pady=10)
+open_btn.grid(column=4, row=4, pady=10)
+label.grid(column=4, row=2, columnspan=1, rowspan=1 , pady=10)
+
+ 
 screen.mainloop()
+str("ffff")
+
+
+
+
+
+

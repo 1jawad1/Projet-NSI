@@ -8,7 +8,7 @@ from room import Room
 
 class Server:
 
-    def __init__(self, host="127.0.0.0", port=55555):
+    def __init__(self, host="127.0.0.1", port=55555):
         self.host = host
         self.port = port
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -145,7 +145,7 @@ class Server:
             return
         self.send(r_type, data, opponent)
     
-    def receive(self, client):
+    def receive(self):
         while True:
             client, adress = self.server.accept()
             print(f"Connected with {str(adress)}")
