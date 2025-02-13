@@ -76,7 +76,9 @@ def show_preview(image, w, h):
     canva.draw()
 
     canva.canva.bind('<Motion>', canva.fillPixel)
-    canva.canva.bind("<Button-1>", canva.fillPixel)
+
+    canva.canva.bind("<ButtonPress-1>", canva.fillPixel)  
+
     canva.canva.bind("<Button-3>", canva.fillPixel)
     
     canva.canva.grid(column=1, row=2, columnspan=3, rowspan=3, padx=25)
