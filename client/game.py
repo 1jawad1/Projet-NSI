@@ -7,6 +7,12 @@ from PIL import Image, ImageTk, ImageOps
 import time
 import Canva
 
+
+class Game : 
+     def __init__(self):
+          pass
+     
+     
 screen = tk.Tk()
 screen.geometry("1000x700")
 
@@ -71,13 +77,15 @@ def show_preview(image, w, h):
     if(canva): canva.canva.destroy()
     
     ecran = tk.Canvas(screen)
-    canva = Canva.Canva(w, h, 10, ecran)
+    canva = Canva.Canva(w, h, 10, ecran, screen)
 
     canva.draw()
 
     canva.canva.bind('<Motion>', canva.fillPixel)
 
-    canva.canva.bind("<ButtonPress-1>", canva.fillPixel)  
+    canva.canva.bind("<Button-1>", canva.fillPixel)  
+
+    screen.bind("<Shift_L>", lambda e: canva.changeClickStatus())  
 
     canva.canva.bind("<Button-3>", canva.fillPixel)
     

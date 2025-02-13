@@ -1,8 +1,9 @@
 class Canva:
     
-    def __init__(self, Nx, Ny, pixel_size, canva):
+    def __init__(self, Nx, Ny, pixel_size, canva, screen):
         self.Nx = Nx
         self.Ny = Ny
+        self.screen = screen
         self.pixel_size = pixel_size
         self.canva_X = self.Nx * self.pixel_size + self.Nx-1
         self.canva_Y = self.Ny * self.pixel_size + self.Ny-1
@@ -56,13 +57,10 @@ class Canva:
                 # print(pixel_tag, self.canva.find_withtag(pixel_tag))
 
                 if e.num == 1 or num == 1:
-                    self.clicked = True
-
                     if self.canva.find_withtag(pixel_tag):
                         self.canva.delete(pixel_tag)
 
                     self.canva.create_rectangle( *pixel_coords, fill=self.current_color, tags=(self.current_color, pixel_tag), width=0)
-                    self.canva.tag_bind(pixel_tag, '<ButtonRelease-1>', lambda e: setattr(self, 'clicked', False))
                     print(self.clicked)
 
                     if self.clicked :
@@ -72,6 +70,13 @@ class Canva:
                 elif ( e.num == 3 or num ==3 ) and self.canva.find_withtag(pixel_tag):
                     print('delete')
                     self.canva.delete(pixel_tag)
+    def changeClickStatus(self):
+        if self.clicked : 
+            self.clicked = False
+        else : 
+            self.clicked = True
+        
+
 
     def select_color(self, color):
         self.current_color = color
