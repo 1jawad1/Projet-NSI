@@ -70,6 +70,7 @@ class Canva:
                 elif ( e.num == 3 or num ==3 ) and self.canva.find_withtag(pixel_tag):
                     print('delete')
                     self.canva.delete(pixel_tag)
+                    
     def changeClickStatus(self):
         if self.clicked : 
             self.clicked = False
