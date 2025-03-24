@@ -68,25 +68,58 @@ class Game(tk.Frame) :
         self.current_image = ImageTk.PhotoImage(image)
         self.show_preview(self.current_image, w, round(w/ratio))
 
-    def download_pixel(self):
-        pop_up = tk.Toplevel()
-        pop_up.geometry("300x300")
+
+    # ouvre la boite de dialogue pour récupérer le chemin où enregistrer l'image ou le txt
+    def save(self, formats : list, factor=1):
+        filename = fd.asksaveasfilename(initialfile=f"{self.name}-project{formats[0][1][1:]}", initialdir="/", title="Chemin d'enregistrement", filetypes=formats)
+    
+        #un peu tordu : si le chemin n'est pas vide je regarde si c'est une image ou un txt et enregistre
+        if filename:
+            if filename.lower().endswith(".txt"):
+                with open(filename, 'w') as text:
+                    text.write("#PIXEL_SOLO_MATRIX_CANVA_BACKUP \n\n")
+                    text.write(str(self.canva.matrix_pixels(self.canva.Nx, self.canva.Ny)))
+            else: 
+                self.canva.fill_img(self.canva.matrix_pixels(self.canva.Nx, self.canva.Ny), filename, factor)
         
-        labelTop = tk.Label(pop_up, text="Choose your favourite month")
-        labelTop.grid(column=1, row=0)
-        export = tk.Button(pop_up, text='exporter', command=self.download_image)
-        export.grid(row=1, column=2)
-        comboExample = ttk.Combobox(pop_up, values=["png", "jpg", "jpeg"])
-        comboExample.grid(column=1, row=1)
-        comboExample.current(1)
-        pop_up.mainloop()
+    # ouvre la page pour exporter le pixel art, faire une sauvegarde et à chaque fois appel la fonction pour log le json
+    def download_pixel(self, width : int, height : int):
 
+        message = tk.Toplevel(name="options d'enregistrements")
+        message.geometry('350x300')
 
-    def download_image(self):
+        def image_export():
+            img_formats = [("PNG files", "*.png"), ("JPEG files", "*.jpg;*.jpeg")]
+            self.save(img_formats, factor=img_factor.get())
+            message.destroy()
 
-        pixels = np.array(self.canva.matrix_pixels(self.canva.Nx, self.canva.Ny), dtype=np.uint8)
-        img = Image.fromarray(pixels, "RGB")
-        img.save('test.jpg')
+        def text_export():
+            self.save([("text files", "*.txt")])
+            message.destroy()
+
+        export_label = tk.LabelFrame(message, text='exporter', padx=12, pady=12)
+
+        tk.Label(export_label, text="Facteur d'agrandissement : ").grid(row=0, column=0)
+        tk.Label(export_label, text="Taille de l'image : ").grid(row=1, column=0)
+        img_size_txt = tk.Label(export_label, text=f'{width} x {height} px', background='white', relief='ridge', width=13)
+
+        img_factor = tk.IntVar(value=1)
+        size_factor = tk.Spinbox(export_label, from_=1, to=100, textvariable=img_factor, wrap=True, command=lambda:img_size_txt.config(text=f'{width * img_factor.get()} x {height * img_factor.get()} px'))
+
+        tk.Button(export_label, text='Exporter', command=image_export).grid(row=2, columnspan=2, pady=7)
+
+        backup_label = tk.LabelFrame(message, text='Sauvegarder', pady=3, padx=10)
+        tk.Label(backup_label, text="Sauvegarde personnelle au format texte : ").grid(row=0, column=0, pady=5)
+        tk.Button(backup_label, text="Sauvegarder", command=text_export).grid(row=1, column=1, pady=5)
+        
+        size_factor.grid(row=0, column=1, pady=7)
+        img_size_txt.grid(row=1, column=1)
+
+        export_label.grid(row=1, columnspan=3, padx=14)
+        backup_label.grid(row=2, columnspan=3)
+
+        message.mainloop()
+
 
     def get_project_data(self, message = False):
         self.share_page = tk.Toplevel()
@@ -151,8 +184,12 @@ class Game(tk.Frame) :
             
         self.ecran = tk.Canvas(self)
         self.canva = Canva.Canva(w, h, 10, self.ecran, self)
-        log_button = tk.Button(self, text='enregistrer', command=self.download_pixel)
-        log_button.grid(column=5, row=3)
+
+        # j'ai rajouter un boutton enregistrer et un autre ouvrir une souvegarde
+        self.log_button = tk.Button(self, text='Enregistrer', command=lambda:self.download_pixel(w, h))
+        self.open_project = tk.Button(self, text='ouvrir sauvegarde', command=self.canva.canva_setup)
+        self.log_button.grid(column=5, row=3)
+        self.open_project.grid(column=5, row=5)
 
         share_button = tk.Button(self, text='partager', command=self.get_project_data)
         share_button.grid(row=4, column=5)
@@ -167,8 +204,6 @@ class Game(tk.Frame) :
         self.canva.canva.bind("<Button-3>", self.canva.fillPixel)
         self.canva.canva.grid(column=1, row=2, columnspan=4, rowspan=4, padx=25)
     
-    def start_project(slef):
-        pass
 
     def ask_forname(self, got_name=False):
         self.name_entry.destroy()

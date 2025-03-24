@@ -1,3 +1,9 @@
+from numpy import array, uint8
+from PIL import Image
+from tkinter.filedialog import askopenfilename
+from tkinter.messagebox import showerror
+from ast import literal_eval
+
 class Canva:
     
     def __init__(self, Nx, Ny, pixel_size, canva, screen):
@@ -101,6 +107,39 @@ class Canva:
 
     def select_color(self, color):
         self.current_color = color
+
+        # crée un fichier image à partir de la matrice de pixels
+    def fill_img(self, pixels: list, path : str, factor : int):
+        pixels = array(pixels, dtype=uint8)
+        img = Image.fromarray(pixels, "RGB")
+        print(img.width, img.height)
+        img = img.resize((img.width*factor, img.height*factor), resample=0)
+        img.save(path)
+
+        # je parcours la matrice et à chaque fois je convertit en hexadecimal puis si c'est blanc je met pas de rectangle sinon j'appelle getPixelCoords() et je crée le rectangle
+    def matrix_to_Canva(self, matrix, width : int, height : int):
+        for j in range(height):
+            for i in range(width):
+                color = "#{:02x}{:02x}{:02x}".format(matrix[j,i][0], matrix[j,i][1], matrix[j,i][2])
+
+                if color != "#ffffff":
+                    coords_x, coords_y  = self.getPixelCoords(10*i+i, 10*j+j)
+
+                    pixel_coords = (coords_x[0]+1, coords_y[0]+1, coords_x[1]+1, coords_y[1]+1)
+                    pixel_tag = (f"{coords_x[0]}-{coords_y[0]}", color)
+                    self.canva.create_rectangle(*pixel_coords, fill=color, tags=pixel_tag, width=0)
+
+    # j'ouvre une boite de dialogue , j'ouvre le fichier txt je vérifie qu'il contient la bonne première phrase et j'envoit la matrice à l'autre fonction
+    def canva_setup(self):
+        file_path = askopenfilename(filetypes=(('Text Files', '*.txt'),), initialdir='/Documents')
+        with open(file_path, 'r') as text_file:
+            first_line = text_file.readline().strip()
+            if first_line != '#PIXEL_SOLO_MATRIX_CANVA_BACKUP':
+                showerror(title='Erreur', message='Le fichier sélectionner est incompatible.')
+            else:
+                text_file.readline()
+                matrix = array(literal_eval(text_file.readline()), dtype=uint8)
+                self.matrix_to_Canva(matrix, len(matrix[0]), len(matrix))
 
 
 

@@ -53,7 +53,7 @@ class Pixocial(tk.Frame):
                 data = js.load(f)
 
                 image = self.draw_image(data['matrice'], data["width"], data["height"], 220, 110)
-                bigger_image = self.draw_image(data['matrice'], data["width"], data["height"], 320, 160)
+                bigger_image = self.draw_image(data['matrice'], data["width"], data["height"], 350, 180)
 
                 detailed_page = dt(tk, data, bigger_image, self.screen)
 
@@ -69,7 +69,7 @@ class Pixocial(tk.Frame):
 
     def draw_image(self, matrice, w, h, max_w, max_h):
         coef = min(max_w//w, max_h//h)
-        return ImageTk.PhotoImage(Image.fromarray(np.array(matrice, dtype = np.uint8), "RGB").resize((w*coef, h*coef), Image.Resampling.LANCZOS))
+        return ImageTk.PhotoImage(Image.fromarray(np.array(matrice, dtype = np.uint8), "RGB").resize((w*coef, h*coef), resample=0))
     
     def switch_page(self, page):
         self.controller.show_frame(page)
