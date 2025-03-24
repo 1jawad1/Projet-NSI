@@ -11,6 +11,7 @@ class Canva:
         self.canva.config( width = self.canva_X , height = self.canva_Y, bg='white', highlightbackground='grey', highlightcolor='grey' )
         self.current_color = '#000000'
         self.clicked = False
+
     def draw(self):
 
         n_x = 1
@@ -24,8 +25,6 @@ class Canva:
                 self.canva.create_line(0, i+n_y, self.canva_X+1,  i+n_y, fill='#eeeeee', width = 1)
                 n_y+=1
     
-    
-
     def getPixelCoords(self, x, y):
 
         x_ = (x//(self.pixel_size+1))*(self.pixel_size+1) 
@@ -50,7 +49,7 @@ class Canva:
                 if not self.canva.find_withtag('hover'):
                     self.canva.create_rectangle(*pixel_coords, fill='#e0e0e0', tags='hover', width=0)
                     self.canva.tag_bind('hover', '<Leave>', lambda e: self.canva.delete('hover'))
-                print('hover')
+                # print('hover')
 
             case e.type if e.type == '4' or self.clicked:
 
@@ -70,6 +69,27 @@ class Canva:
                 elif ( e.num == 3 or num ==3 ) and self.canva.find_withtag(pixel_tag):
                     print('delete')
                     self.canva.delete(pixel_tag)
+
+    # pour former la matrice avec les couleurs RGB des pixels du canva
+    def matrix_pixels(self, width : int, height : int):
+
+        matrix = []
+        print(matrix)
+        for j in range(height):
+            matrix.append([])
+            for i in range(width):
+                pix_tag = f'{10 * i + i}-{10 * j + j}'
+                pixel_id = self.canva.find_withtag(pix_tag)
+
+                if pixel_id:
+                    hex_color = self.canva.itemcget(pixel_id, "fill")
+                    print(hex_color[1:3], hex_color[3:5], hex_color[5:7])
+                    rgb_color = [int(hex_color[k:k+2], 16) for k in [1, 3, 5]] 
+                else:
+                    rgb_color = [255, 255, 255]
+
+                matrix[j].append(rgb_color)
+        return matrix
                     
     def changeClickStatus(self):
         if self.clicked : 
