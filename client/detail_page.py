@@ -1,3 +1,4 @@
+import tkinter
 class Detail_page:
 
     def __init__(self, tk, data, img, root):
@@ -28,7 +29,7 @@ class Detail_page:
         if not self.opened : 
             self.opened = True
 
-            self.details_page = self.tk.Toplevel(self.root)
+            self.details_page = tkinter.Toplevel(self.root)
             self.details_page.transient(self.root)  
             self.details_page.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -62,7 +63,7 @@ class Detail_page:
             color_frame = self.tk.Frame(self.details_page)
 
             for i in self.palette:
-                button = self.tk.Canvas(color_frame, width=15, height=15, bg=self.details_page.cget("bg"), highlightthickness=0)
+                button = tkinter.Canvas(color_frame, width=15, height=15, bg=self.details_page.cget("bg"), highlightthickness=0)
                 button.create_oval(1, 1, 14, 14, fill=i, outline=i)
                 button.pack(side="left", padx=5)
 

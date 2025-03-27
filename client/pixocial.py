@@ -1,6 +1,7 @@
 import pathlib as pt
 import json as js
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 import numpy as np
 
@@ -8,7 +9,7 @@ from post import Post
 from detail_page import Detail_page as dt
 
 
-class Pixocial(tk.Frame):
+class Pixocial(ttk.Frame):
 
     def __init__(self, path, screen, controller):
 
@@ -22,13 +23,13 @@ class Pixocial(tk.Frame):
         self.canva = tk.Canvas(self)
         self.canva.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
-        scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.canva.yview)
+        scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.canva.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         self.canva.configure(yscrollcommand=scrollbar.set)
         self.canva.bind("<Configure>", lambda e: self.canva.configure(scrollregion=self.canva.bbox("all")))
 
-        self.content_frame = tk.Frame(self.canva)
+        self.content_frame = ttk.Frame(self.canva)
         self.canva.create_window((0,0), window=self.content_frame, anchor="nw")
 
         self.canva.bind_all("<MouseWheel>", self.on_mouse_wheel)
@@ -41,11 +42,8 @@ class Pixocial(tk.Frame):
 
     def draw_blog(self):
 
-        play_game = tk.Button(self.content_frame, text='pixelsolo', command=lambda : self.switch_page("game"))
-        play_game.grid(row=0, column=0, padx=5)
-
-        title = tk.Label(self.content_frame, text="Pixocial", font=("Helvetica", 24, "bold"))
-        title.grid(row=0, column=1, columnspan=2, pady=10)
+        title = ttk.Label(self.content_frame, text="Pixocial", font=("Helvetica", 24, "bold"))
+        title.grid(row=0, column=0, columnspan=3, pady=10)
         
         position = 0
         for i in self.get_directories_paths():
@@ -55,10 +53,10 @@ class Pixocial(tk.Frame):
                 image = self.draw_image(data['matrice'], data["width"], data["height"], 220, 110)
                 bigger_image = self.draw_image(data['matrice'], data["width"], data["height"], 350, 180)
 
-                detailed_page = dt(tk, data, bigger_image, self.screen)
+                detailed_page = dt(ttk, data, bigger_image, self.screen)
 
-                cell = Post(data, tk, js,  str(i), image, detailed_page.show_details)
-                frame = tk.LabelFrame(self.content_frame)
+                cell = Post(data, ttk, js,  str(i), image, detailed_page.show_details)
+                frame = ttk.LabelFrame(self.content_frame)
 
                 cell.draw_cell(frame)
 
@@ -70,9 +68,7 @@ class Pixocial(tk.Frame):
     def draw_image(self, matrice, w, h, max_w, max_h):
         coef = min(max_w//w, max_h//h)
         return ImageTk.PhotoImage(Image.fromarray(np.array(matrice, dtype = np.uint8), "RGB").resize((w*coef, h*coef), resample=0))
-    
-    def switch_page(self, page):
-        self.controller.show_frame(page)
+
 
 
 if __name__ == '__main__':

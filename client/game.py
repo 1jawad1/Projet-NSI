@@ -14,37 +14,72 @@ import time
 import Canva
  
 
-class Game(tk.Frame) : 
+class Game(ttk.Frame) : 
      
-    def __init__(self, screen, controller):
+    def __init__(self, screen, data):
         super().__init__(screen)
         self.screen = screen
 
-        self.controller =controller
+        self.data = data
+        self.project_name = data["Nom du projet"]
+        self.width = data["Largeur"]
+        self.height = data["Hauteur"]
+        self.bg = data["Fond"]
+
+        
+
         self.canva = False
-        self.name = None
+        self.name = "Anonyme"
 
-        self.colors = ["#000000", "#ffe2c3", "#ff0000", "#f57de7", "#9329ce", "#0821b3","#35c729", "#62d4ed", "#839845", "#5c6c86"]
-
-        self.color_buttons_frame = tk.Frame(self)
-        self.color_buttons_frame.grid(column=1, row=6, columnspan=5, pady=20)
+        self.colors = data["Palette"]
 
         self.current_image = None
-        self.label = tk.Label(self, text="No image selected")
-
-        self.name_entry = tk.Entry(self, width=60)
-        self.name_buttun = tk.Button(self, text='Apply', command=lambda : self.ask_forname(self.name_entry.get()))
-
-    def switch_page(self, page):
-        self.controller.show_frame(page)
+        self.label = ttk.Label(self, text="No image selected", style='Content.TLabel')
 
 
-    #pixelsolo
-    def create_color_button(self, color):
-        button = tk.Canvas(self.color_buttons_frame, width=30, height=30, bg=self.cget("bg"), highlightthickness=0)
+    def create_color_button(self, color, frame):
+        button = tk.Canvas(frame, width=30, height=30, highlightthickness=0)
         button.create_oval(2, 2, 28, 28, fill=color, outline=color)
         button.bind("<Button-1>", lambda event, c=color: self.canva.select_color(c))
-        button.pack(side="left", padx=5)
+        button.pack(side="left", padx=5)   
+
+    def display_game(self):
+
+        title = ttk.Label(self, text='PIxelSolo', style="Title.TLabel")
+        title.grid(column=2, row=1, columnspan=3, pady=10)
+
+        if(self.canva): self.canva.canva.destroy()
+            
+        self.ecran = tk.Canvas(self)
+        self.canva = Canva.Canva(self.width, self.height, 10, self.ecran, self,self.bg)
+
+
+        share_button = ttk.Button(self, text='partager', command=self.get_project_data, style="TButton")
+        share_button.grid(row=4, column=5)
+
+        self.canva.draw()
+
+        self.canva.canva.bind('<Motion>', self.canva.fillPixel)
+        self.canva.canva.bind("<Button-1>", self.canva.fillPixel)  
+
+        
+        
+        self.canva.canva.bind("<Button-3>", self.canva.fillPixel)
+        self.canva.canva.grid(column=1, row=2, columnspan=4, rowspan=4, padx=25)
+
+
+        color_buttons_frame = ttk.Frame(self, style="TFrame")
+        color_buttons_frame.grid(column=1, row=6, columnspan=5, pady=20)
+
+        for color in self.colors:
+            self.create_color_button(color, color_buttons_frame)
+
+        open_btn = ttk.Button(self, text="open a file", command=self.select_file, style="TButton")
+        name = ttk.Label(self, text=self.name, style="Subtitle.TLabel")
+
+        open_btn.grid(column=5, row=5, pady=10)
+        name.grid(column=5, row=1)
+        self.label.grid(column=5, row=2, columnspan=1, rowspan=1 , pady=10)
 
 
     def select_file(self):
@@ -53,7 +88,6 @@ class Game(tk.Frame) :
     
         showinfo(title='Selected File', message=filename)
         self.editImage(filename, 50)
-
 
     def editImage(self, filename, w):
         image = Image.open(filename)
@@ -66,10 +100,11 @@ class Game(tk.Frame) :
         image = image.quantize(colors=10, method=Image.Quantize.FASTOCTREE)
 
         self.current_image = ImageTk.PhotoImage(image)
-        self.show_preview(self.current_image, w, round(w/ratio))
 
+        self.label.config(image=self.current_image)
 
     # ouvre la boite de dialogue pour récupérer le chemin où enregistrer l'image ou le txt
+
     def save(self, formats : list, factor=1):
         filename = fd.asksaveasfilename(initialfile=f"{self.name}-project{formats[0][1][1:]}", initialdir="/", title="Chemin d'enregistrement", filetypes=formats)
     
@@ -81,9 +116,10 @@ class Game(tk.Frame) :
                     text.write(str(self.canva.matrix_pixels(self.canva.Nx, self.canva.Ny)))
             else: 
                 self.canva.fill_img(self.canva.matrix_pixels(self.canva.Nx, self.canva.Ny), filename, factor)
+
         
     # ouvre la page pour exporter le pixel art, faire une sauvegarde et à chaque fois appel la fonction pour log le json
-    def download_pixel(self, width : int, height : int):
+    def download_pixel(self):
 
         message = tk.Toplevel(name="options d'enregistrements")
         message.geometry('350x300')
@@ -97,20 +133,20 @@ class Game(tk.Frame) :
             self.save([("text files", "*.txt")])
             message.destroy()
 
-        export_label = tk.LabelFrame(message, text='exporter', padx=12, pady=12)
+        export_label = ttk.LabelFrame(message, text='exporter')
 
-        tk.Label(export_label, text="Facteur d'agrandissement : ").grid(row=0, column=0)
-        tk.Label(export_label, text="Taille de l'image : ").grid(row=1, column=0)
-        img_size_txt = tk.Label(export_label, text=f'{width} x {height} px', background='white', relief='ridge', width=13)
+        ttk.Label(export_label, text="Facteur d'agrandissement : ", style="TLabel").grid(row=0, column=0)
+        ttk.Label(export_label, text="Taille de l'image : ", style="TLabel").grid(row=1, column=0)
+        img_size_txt = ttk.Label(export_label, text=f'{self.width} x {self.height} px', background='white', relief='ridge', width=13, style="TLabel")
 
         img_factor = tk.IntVar(value=1)
-        size_factor = tk.Spinbox(export_label, from_=1, to=100, textvariable=img_factor, wrap=True, command=lambda:img_size_txt.config(text=f'{width * img_factor.get()} x {height * img_factor.get()} px'))
+        size_factor = ttk.Spinbox(export_label, from_=1, to=100, textvariable=img_factor, wrap=True, command=lambda:img_size_txt.config(text=f'{self.width * img_factor.get()} x {self.height * img_factor.get()} px'), style="TSpinbox")
 
-        tk.Button(export_label, text='Exporter', command=image_export).grid(row=2, columnspan=2, pady=7)
+        ttk.Button(export_label, text='Exporter', command=image_export, style="TButton").grid(row=2, columnspan=2, pady=7)
 
-        backup_label = tk.LabelFrame(message, text='Sauvegarder', pady=3, padx=10)
-        tk.Label(backup_label, text="Sauvegarde personnelle au format texte : ").grid(row=0, column=0, pady=5)
-        tk.Button(backup_label, text="Sauvegarder", command=text_export).grid(row=1, column=1, pady=5)
+        backup_label = ttk.LabelFrame(message, text='Sauvegarder')
+        ttk.Label(backup_label, text="Sauvegarde personnelle au format texte : ", style="TLabel").grid(row=0, column=0, pady=5)
+        ttk.Button(backup_label, text="Sauvegarder", command=text_export, style="TButton").grid(row=1, column=1, pady=5)
         
         size_factor.grid(row=0, column=1, pady=7)
         img_size_txt.grid(row=1, column=1)
@@ -124,21 +160,21 @@ class Game(tk.Frame) :
     def get_project_data(self, message = False):
         self.share_page = tk.Toplevel()
 
-        title = tk.Label(self.share_page, text="Share your project !", font=("Helvetica", 16, "bold"))
+        title = ttk.Label(self.share_page, text="Share your project !", style="Title.TLabel")
         title.grid(column=1, row=1, padx=20, pady=5)
 
         if message:
-            error = tk.Label(self.share_page, text=message, fg='red')
+            error = ttk.Label(self.share_page, text=message, fg='red', style="TLabel")
             error.grid(column=1, row=2, sticky='s', pady=5)
 
-        name_label = tk.Label(self.share_page, text="your project's name : " )
-        project_name = tk.Entry(self.share_page, width=25)
+        name_label = ttk.Label(self.share_page, text="your project's name : " , style="TLabel")
+        project_name = ttk.Entry(self.share_page, width=25, style="TEntry")
 
-        description_label = tk.Label(self.share_page, text="a description of your project : " )
-        project_description = tk.Entry(self.share_page, width=25)
+        description_label = ttk.Label(self.share_page, text="a description of your project : ", style="TLabel" )
+        project_description = ttk.Entry(self.share_page, width=25, style="TEntry")
 
-        tags_label = tk.Label(self.share_page, text="some tags (seperate each tag with a space): " )
-        project_tags = tk.Entry(self.share_page, width=25)
+        tags_label = ttk.Label(self.share_page, text="some tags (seperate each tag with a space): ", style="TLabel" )
+        project_tags = ttk.Entry(self.share_page, width=25, style="TEntry")
 
         name_label.grid(column=1, row=3, sticky='sw', pady=(5, 0), padx=20)
         project_name.grid(column=1, row=4, sticky='wn', pady=(0, 5), padx=20)
@@ -149,7 +185,7 @@ class Game(tk.Frame) :
         tags_label.grid(column=1, row=7, sticky='sw', pady=(5, 0), padx=20)
         project_tags.grid(column=1, row=8, sticky='nw', pady=(0, 5), padx=20)
 
-        sub_button = tk.Button(self.share_page, text='Share!', command=lambda : self.user_log({"name":project_name.get(), "description":project_description.get(), "tags":project_tags.get()}) )
+        sub_button = ttk.Button(self.share_page, text='Share!', command=lambda : self.user_log({"name":project_name.get(), "description":project_description.get(), "tags":project_tags.get()}) , style="TButton")
         sub_button.grid(column=1, row=9, pady=5)
 
         
@@ -175,80 +211,153 @@ class Game(tk.Frame) :
         with open(f"client/data/{data['name']}.json", 'w', encoding='utf8') as file_data:
             js.dump(user_data, file_data, indent=4)
 
-
-    def show_preview(self, image, w, h):
-
-        self.label.config(image=image)
-
-        if(self.canva): self.canva.canva.destroy()
-            
-        self.ecran = tk.Canvas(self)
-        self.canva = Canva.Canva(w, h, 10, self.ecran, self)
-
-        # j'ai rajouter un boutton enregistrer et un autre ouvrir une souvegarde
-        self.log_button = tk.Button(self, text='Enregistrer', command=lambda:self.download_pixel(w, h))
-        self.open_project = tk.Button(self, text='ouvrir sauvegarde', command=self.canva.canva_setup)
-        self.log_button.grid(column=5, row=3)
-        self.open_project.grid(column=5, row=5)
-
-        share_button = tk.Button(self, text='partager', command=self.get_project_data)
-        share_button.grid(row=4, column=5)
-
-        self.canva.draw()
-
-        self.canva.canva.bind('<Motion>', self.canva.fillPixel)
-        self.canva.canva.bind("<Button-1>", self.canva.fillPixel)  
-
-        
-        
-        self.canva.canva.bind("<Button-3>", self.canva.fillPixel)
-        self.canva.canva.grid(column=1, row=2, columnspan=4, rowspan=4, padx=25)
-    
-
-    def ask_forname(self, got_name=False):
-        self.name_entry.destroy()
-        self.name_buttun.destroy()
-
-        if got_name:
-            self.name = got_name
-            self.display_game()
-            
-
-            print(self.name)
-            return
-
-        self.name_entry = tk.Entry(self, width=60)
-        self.name_buttun = tk.Button(self, text='Apply', command=lambda : self.ask_forname(self.name_entry.get()))
-
-        self.name_entry.grid(row=2, column=1, padx=200, pady=50)
-        self.name_buttun.grid(row=3, column=1, sticky='n')
-
-    
-
-    def display_game(self):
-
-        see_social = tk.Button(self, text='pixocial', command=lambda : self.switch_page("pixocial"))
-        see_social.grid(row=1, column=1, padx=5)
-
-        title = tk.Label(self, text='PIxelSolo', font=("Arial", 25, "bold"))
-        title.grid(column=2, row=1, columnspan=3, pady=10)
-
-        for color in self.colors:
-            self.create_color_button(color)
-
-        open_btn = tk.Button(self, text="open a file", command=self.select_file)
-        name = tk.Label(self, text=self.name, font=("Helvetica", 20))
-
-        open_btn.grid(column=5, row=5, pady=10)
-        name.grid(column=5, row=1)
-        self.label.grid(column=5, row=2, columnspan=1, rowspan=1 , pady=10)
-
     def start_game(self):
-        self.ask_forname()        
-     
+        self.display_game()
 
-if __name__ == '__main__':
+all_project = {}
+current_project =None
 
-    screen = tk.Tk()
+def game_systeme(screen, controler):
 
-    Game(screen).start_game()
+    global all_project, current_project
+
+    game_page = ttk.Frame(screen, style="TFrame")
+
+    
+    PALETTES = {
+            "Classique": ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"],
+            "Pastel": ["#FFB6C1", "#FFD700", "#87CEEB", "#98FB98", "#DDA0DD", "#FFDEAD"],
+            "Sombre": ["#8B0000", "#006400", "#00008B", "#808000", "#4B0082", "#2F4F4F"],
+            "Nature": ["#137C8B", "#709CA7", "#B8CBD0", "#7A90A4", "#344D59"],
+            "Pastel cold": ["#B0A1BA", "#A5B5BF", "#ABC8C7", "#B8E2C8", "#BFF0D4"],
+            "Vintage": ["#F2EFE7", "#FFDAB3", "#C8AAAA", "#9F8383", "#574964", "#54473F"],
+            "Vert": ["#D2D79F", "#90B77D", "#1B9C85", "#739072", "#304D30", "#12372A"],
+            "Violet": ["#F5EFFF", "#DAD2FF", "#B2A5FF", "#B771E5", "#493D9E"],
+            "Noël (Héloïse)": ["#6B240C", "#640D6B", "#727D73","#FF0000","#FFC100","#FBFBFB"],
+            "Golden Hour": ["#FFD369", "#FFB200", "#FF9900", "#EB5B00", "#C70039", "#B70404"],
+            "Winter": [ "#3E5879", "#D8C4B6", "#F5EFE7","#DFF5FF", "#608BC1", "#133E87"],
+            "Bleu": ["#A7E6FF", "#3ABEF9", "#7EA1FF", "#3572EF", "#0E46A3", "#0B2F9F"]
+    }
+    
+    BG={
+    "Blanc":'#ffffff',
+    "Noir":'#000000'
+    }
+    
+    draw_areas = ttk.Notebook(game_page, style="TNotebook")
+    get_data_frame = ttk.Frame(game_page, style="TFrame")
+
+    draw_areas.bind("<<NotebookTabChanged>>", lambda x:on_tab_change(x, draw_areas, controler, get_data_frame))
+
+    error = ttk.Label(get_data_frame, text='Please enter the required data !!', foreground = "red", style="TLabel")
+
+    # Nom du projet
+    ttk.Label(get_data_frame, text="Nom du Projet:", style="Content.TLabel").grid(row=0, column=0, padx=10, pady=(100, 0), sticky="e")
+    project_name = ttk.Entry(get_data_frame, style="TEntry")
+    project_name.grid(row=0, column=1, padx=10, pady=(100, 0), sticky="we")
+
+    # Dimensions du canevas
+# Variables pour largeur et hauteur
+    width_var = tk.IntVar(value=10)
+    height_var = tk.IntVar(value=10)
+
+    def update_width(val):
+        width_var.set(int(float(val)))
+    
+    def update_height(val):
+        height_var.set(int(float(val)))
+    
+    ttk.Label(get_data_frame, text="Largeur (px):", style="Content.TLabel").grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    width_scale = ttk.Scale(get_data_frame, from_=5, to=60, variable=width_var, orient="horizontal", command=update_width, style="TScale")
+    width_scale.grid(row=1, column=2, padx=10, pady=5, sticky="w")
+    width_spinbox = ttk.Spinbox(get_data_frame, from_=5, to=60, textvariable=width_var, command=lambda: width_scale.set(width_var.get()), style="TSpinbox")
+    width_spinbox.grid(row=1, column=1, padx=10, pady=5, sticky="we")
+
+    ttk.Label(get_data_frame, text="Hauteur (px):", style="Content.TLabel").grid(row=2, column=0, padx=10, pady=5, sticky="e")
+    height_scale = ttk.Scale(get_data_frame, from_=5, to=40, variable=height_var, orient="horizontal", command=update_height, style="TScale")
+    height_scale.grid(row=2, column=2, padx=10, pady=5, sticky="w")
+    height_spinbox = ttk.Spinbox(get_data_frame, from_=5, to=40, textvariable=height_var, command=lambda: height_scale.set(height_var.get()), style="TSpinbox")
+    height_spinbox.grid(row=2, column=1, padx=10, pady=5, sticky="we")
+
+
+    # Palette de couleurs
+    ttk.Label(get_data_frame, text="Palette de couleurs:", style="Content.TLabel").grid(row=3, column=0, padx=10, pady=5, sticky="e")
+    palettes = [i for i in PALETTES.keys()]
+    palette_select = ttk.Combobox(get_data_frame, values=palettes, state="readonly")
+    palette_select.grid(row=3, column=1, padx=10, pady=5, sticky="we")
+
+
+    # Fond du canevas
+    ttk.Label(get_data_frame, text="Fond du canevas:", style="Content.TLabel").grid(row=5, column=0, padx=10, pady=5, sticky="e")
+    backgrounds = ["Blanc", "Noir"]
+    bg_select = ttk.Combobox(get_data_frame, values=backgrounds, state="readonly")
+    bg_select.grid(row=5, column=1, padx=10, pady=5, sticky="we")
+
+    def reset_fields():
+        project_name.delete(0, tk.END)
+        width_var.set(32)
+        height_var.set(32)
+        palette_select.set("")
+        bg_select.set("")
+        draw_areas.tkraise()
+
+    def create_project():
+        global current_project, get_data_frame
+        error.grid_forget()
+
+        data = {
+            "Nom du projet" : project_name.get(),
+            "Largeur" : width_var.get(),
+            "Hauteur" : height_var.get(),
+            "Palette" : palette_select.get(),
+            "Fond" : BG[bg_select.get()]
+        }
+
+        if not (data["Nom du projet"] and data["Largeur"] and data["Hauteur"] and data["Palette"] and data["Fond"]):
+            error.grid(row=8, column=0, columnspan=2)
+            return
+        
+        data["Palette"] = PALETTES[data["Palette"]]
+        all_project[data["Nom du projet"]] = Game(draw_areas, data)
+        draw_areas.add(all_project[data["Nom du projet"]], text = data["Nom du projet"])
+        all_project[data["Nom du projet"]].start_game()
+        reset_fields()
+        print(all_project)
+    
+        
+        
+
+    # Boutons
+    btn_create = ttk.Button(get_data_frame, text="Créer Projet", command=create_project, style="TButton")
+    btn_create.grid(row=6, column=0, columnspan=3, pady=10)
+
+    btn_cancel = ttk.Button(get_data_frame, text="Annuler", command=reset_fields, style="TButton")
+    btn_cancel.grid(row=7, column=0, columnspan=3, pady=5)
+
+
+    draw_areas.grid(row=0, column=0, sticky='nsew')
+    get_data_frame.grid(row=0, column=0, sticky='nsew')
+
+    game_page.grid_columnconfigure(0, weight=1)  
+    game_page.grid_rowconfigure(0, weight=1)
+
+    get_data_frame.grid_columnconfigure((0,1,2), weight=1)
+
+    return game_page
+
+def on_tab_change(event,notebook,controler, get_data_frame):
+    print('tab_changed')
+    global current_project
+    selected_tab = notebook.select()  # Récupère l'ID de l'onglet sélectionné
+    if selected_tab:  # Vérifie qu'il y a bien une tab sélectionnée
+        selected_widget = notebook.nametowidget(selected_tab)  # Récupère le widget correspondant à la tab sélectionnée
+        for name, frame in all_project.items():
+            if frame == selected_widget:
+                current_project = name
+                controler.draw_menu()
+                controler.bind("<Shift_L>", lambda e: all_project[current_project].canva.changeClickStatus()) 
+                controler.file_menu.entryconfigure("Nouveau Projet", command=get_data_frame.tkraise)
+                break
+    else:
+        current_project = None
+    print(current_project)

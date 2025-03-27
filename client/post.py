@@ -1,6 +1,4 @@
 
-
-
 class Post:
     
     def __init__(self, data, tk, json,  path, image, show_detail):

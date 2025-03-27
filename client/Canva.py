@@ -6,15 +6,16 @@ from ast import literal_eval
 
 class Canva:
     
-    def __init__(self, Nx, Ny, pixel_size, canva, screen):
+    def __init__(self, Nx, Ny, pixel_size, canva, screen,bg):
         self.Nx = Nx
         self.Ny = Ny
         self.screen = screen
         self.pixel_size = pixel_size
+        self.bg=bg
         self.canva_X = self.Nx * self.pixel_size + self.Nx-1
         self.canva_Y = self.Ny * self.pixel_size + self.Ny-1
         self.canva = canva
-        self.canva.config( width = self.canva_X , height = self.canva_Y, bg='white', highlightbackground='grey', highlightcolor='grey' )
+        self.canva.config( width = self.canva_X , height = self.canva_Y, bg=self.bg, highlightbackground='grey', highlightcolor='grey' )
         self.current_color = '#000000'
         self.clicked = False
 
@@ -92,7 +93,7 @@ class Canva:
                     print(hex_color[1:3], hex_color[3:5], hex_color[5:7])
                     rgb_color = [int(hex_color[k:k+2], 16) for k in [1, 3, 5]] 
                 else:
-                    rgb_color = [255, 255, 255]
+                    rgb_color = [int(self.bg[k:k+2], 16) for k in [1, 3, 5]] 
 
                 matrix[j].append(rgb_color)
         return matrix
