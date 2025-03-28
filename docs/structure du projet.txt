@@ -1,0 +1,58 @@
+# STRUCTURE DU PROJET
+
+## Aperçu
+Ce projet est organisé en plusieurs fichiers et dossiers pour une meilleure modularité. Voici un aperçu de la structure et du rôle de chaque fichier.
+
+## Fichiers principaux
+
+### `main.py`
+Ce fichier est le point d'entrée du programme. Il initialise l'interface graphique et gère le lancement de l'application.
+
+### `post.py`
+Gère l'affichage et la gestion des publications. Il contient la classe `Post`, qui est utilisée pour afficher les posts de l'utilisateur.
+
+### `detail_page.py`
+Fichier contenant la classe `Detail_page`, permettant d'afficher une page détaillée pour un post sélectionné.
+
+### `pixocial.py`
+Ce fichier contient la classe `Pixocial`, qui structure l'interface principale et gère l'affichage des différents posts à travers un `Canvas` avec une barre de défilement.
+
+### `canva.py`
+Ce fichier est responsable de la gestion de la zone de dessin dans le jeu. Il contient la classe Canva, qui permet à l'utilisateur de dessiner sur une grille
+
+### `game.py`
+Ce fichier gère la logique du jeu lui-même. Il contient la classe Game et permet de gérer la création de projet ainsi que leurs gestion.
+
+### `home.py`
+Le fichier home.py représente la page d'accueil de l'application. Il contient la classe Home, qui initialise l'interface avec trois sections principales représentant chaque mode de jeu (PixlSolo, PixelWar, Pixocial). 
+
+### `style.py`
+Ce fichier contient les styles et la mise en page de l'interface graphique. Il définit les couleurs, polices, tailles de texte, et autres éléments visuels de l'application pour garantir une présentation cohérente et agréable. Les classes définies ici sont importées dans les autres fichiers pour appliquer les styles.
+
+
+## Dossiers et fichiers auxiliaires
+
+### `client/data/`
+Ce dossier contient les fichiers JSON stockant les données des posts. Chaque fichier JSON contient des informations sur une publication (image, titre, description, etc.).
+
+### `requirements.txt`
+Contient la liste des bibliothèques nécessaires à l'exécution du projet :
+```
+Pillow
+numpy
+```
+
+### `LICENSE`
+Fournit les conditions d'utilisation du projet sous la licence GPL v3.
+
+## Organisation des classes et interactions
+- `main.py` initialise et lance l'application.
+- `pixocial.py` gère l'affichage des posts via la classe `Pixocial`.
+- `post.py` définit la classe `Post`, qui est utilisée par `pixocial.py` pour afficher les publications.
+- `detail_page.py` affiche une vue détaillée d'un post via la classe `Detail_page`.
+- `canva.py` gère l'interface de dessin avec la classe Canva.
+- `game.py` contient la logique de création de projet et de gestion.
+- `home.py` structure l'écran d'accueil avec la classe `Home` pour sélectionner le mode de jeu.
+- `style.py` définit les styles visuels appliqués dans toute l'application.
+
+Chaque fichier est conçu pour interagir de manière modulaire et optimiser la gestion des posts et de l'affichage de l'application.
