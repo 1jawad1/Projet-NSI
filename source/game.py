@@ -59,7 +59,7 @@ class Game(ttk.Frame) :
         share_button.grid(row=4, column=5)
 
         self.canva.draw()
-
+        self.tools()
         self.canva.canva.bind('<Motion>', self.canva.fillPixel)
         self.canva.canva.bind("<Button-1>", self.canva.fillPixel)  
 
@@ -72,7 +72,7 @@ class Game(ttk.Frame) :
 
 
         color_buttons_frame = ttk.Frame(self, style="TFrame")
-        color_buttons_frame.grid(column=1, row=6, columnspan=5, pady=20)
+        color_buttons_frame.grid(column=2, row=6, columnspan=5, pady=20)
 
         for color in self.colors:
             self.create_color_button(color, color_buttons_frame)
@@ -84,7 +84,52 @@ class Game(ttk.Frame) :
         name.grid(column=5, row=1)
         self.label.grid(column=5, row=2, columnspan=1, rowspan=1 , pady=10)
 
-    
+    def tools(self):
+        def bind_fill(func):
+            self.canva.canva.unbind("<Button-1>")
+            if self.tools_bind and func == self.active_tool:
+                self.canva.canva.bind("<Button-1>", self.canva.fillPixel) 
+                self.tools_bind = False
+                self.active_tool = self.canva.fillPixel
+            else:
+                self.canva.canva.bind("<Button-1>", lambda e:func(e.x, e.y))
+                self.tools_bind = True
+                self.active_tool = func
+
+        def delete_all():
+            self.ecran.delete("all")
+            self.canva.draw()
+
+        self.tools_frame = ttk.Frame(self, style="TFrame")
+
+        # bouttons des outils
+        self.tools_bind = False
+        self.active_tool = self.canva.fillPixel
+
+        self.bomb = tk.PhotoImage(file="./assets/bomb.png")
+        self.bomb_button = tk.Button(self.tools_frame, image=self.bomb, command=delete_all)
+
+        self.paint_bucket = tk.PhotoImage(file="./assets/paint_bucket.png")
+        self.fill_button = tk.Button(self.tools_frame, image=self.paint_bucket, command=lambda:bind_fill(self.canva.fill_zone))
+
+        self.circle = tk.PhotoImage(file="./assets/circle.png")
+        self.circle_button = tk.Button(self.tools_frame, image=self.circle, command=lambda:bind_fill(self.canva.circle_click))
+        
+        self.stroke = tk.PhotoImage(file="./assets/stroke.png")
+        self.stroke_button = tk.Button(self.tools_frame, image=self.stroke, command=lambda:bind_fill(self.canva.line_click))
+
+        self.rect = tk.PhotoImage(file="./assets/rectangle.png")
+        self.rect_button = tk.Button(self.tools_frame, image=self.rect, command=lambda:bind_fill(self.canva.square_click))
+        if self.height < 33:
+            self.tools_frame.grid(column=2, row=7, sticky="w")
+        else:
+            self.tools_frame.grid(column=1, row=6, padx=5)
+
+        self.fill_button.pack(side="left", padx=2.5)
+        self.circle_button.pack(side="left", padx=2.5)
+        self.stroke_button.pack(side="left", padx=2.5)
+        self.rect_button.pack(side="left", padx=2.5)
+        self.bomb_button.pack(side="left", padx=2.5)
 
 
 
@@ -129,7 +174,7 @@ class Game(ttk.Frame) :
 
         message = tk.Toplevel()
         message.title("Options d'enregistrement")
-        message.geometry('350x300')
+        message.geometry('405x300')
         message.configure(bg="#2C2F33")
 
         def image_export():
