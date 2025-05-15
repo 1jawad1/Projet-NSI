@@ -22,7 +22,6 @@ class Canva:
 
 
     def draw(self):
-
         n_x = 1
         n_y = 1
 
@@ -187,7 +186,11 @@ class Canva:
 
     def line(self, start: tuple, end: tuple):
         x0, y0 = start
+        x0 += 5
+        y0 += 5
         x1, y1 = end
+        x1 += 5
+        y1 += 5
         dx = x1 - x0
         dy = y1 - y0
         abs_dx = abs(dx)
@@ -200,7 +203,6 @@ class Canva:
                 y = int(y0 + t * dy)
                 self.putt_pixel(x, y, self.current_color)
         else:
-            # Avance en Y, calcule X
             for y in range(y0, y1 + step_y, step_y):
                 t = (y - y0) / dy if dy != 0 else 0
                 x = int(x0 + t * dx)

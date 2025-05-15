@@ -76,7 +76,6 @@ class App(tk.Tk):
     def change_theme(self, theme):
         style.apply_theme(self.style, theme)
         self.theme = theme
-
         # for widget in self.get_all_children():
         #     widget.configure(style=widget.winfo_class())
 

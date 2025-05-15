@@ -26,8 +26,6 @@ class Game(ttk.Frame) :
         self.height = data["Hauteur"]
         self.bg = data["Fond"]
 
-        
-
         self.canva = False
         self.name = "Anonyme"
 
@@ -72,7 +70,7 @@ class Game(ttk.Frame) :
 
 
         color_buttons_frame = ttk.Frame(self, style="TFrame")
-        color_buttons_frame.grid(column=2, row=6, columnspan=5, pady=20)
+        color_buttons_frame.grid(column=2, row=6, pady=20)
 
         for color in self.colors:
             self.create_color_button(color, color_buttons_frame)
@@ -120,8 +118,8 @@ class Game(ttk.Frame) :
 
         self.rect = tk.PhotoImage(file="./assets/rectangle.png")
         self.rect_button = tk.Button(self.tools_frame, image=self.rect, command=lambda:bind_fill(self.canva.square_click))
-        if self.height < 33:
-            self.tools_frame.grid(column=2, row=7, sticky="w")
+        if self.height < 30:
+            self.tools_frame.grid(column=2, row=7)
         else:
             self.tools_frame.grid(column=1, row=6, padx=5)
 
