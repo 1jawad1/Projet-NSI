@@ -60,13 +60,16 @@ class Game(ttk.Frame) :
         self.tools()
         self.canva.canva.bind('<Motion>', self.canva.fillPixel)
         self.canva.canva.bind("<Button-1>", self.canva.fillPixel)  
+        self.canva.canva.focus_set()
+        self.canva.canva.bind('<Control-z>', lambda e:self.canva.undo_action())
+        self.canva.canva.bind('<Control-y>', lambda e:self.canva.redo_action())
 
         # clear_btn = tk.Button(self.screen, text="Effacer", command=self.clear_canvas)
         # clear_btn.grid(column=4, row=3)
 
         
         self.canva.canva.bind("<Button-3>", self.canva.fillPixel)
-        self.canva.canva.grid(column=1, row=2, columnspan=4, rowspan=4, padx=25)
+        self.canva.canva.grid(column=1, row=2, columnspan=3, rowspan=4, padx=5)
 
 
         color_buttons_frame = ttk.Frame(self, style="TFrame")
@@ -118,18 +121,25 @@ class Game(ttk.Frame) :
 
         self.rect = tk.PhotoImage(file="./assets/rectangle.png")
         self.rect_button = tk.Button(self.tools_frame, image=self.rect, command=lambda:bind_fill(self.canva.square_click))
-        if self.height < 30:
-            self.tools_frame.grid(column=2, row=7)
-        else:
-            self.tools_frame.grid(column=1, row=6, padx=5)
 
-        self.fill_button.pack(side="left", padx=2.5)
-        self.circle_button.pack(side="left", padx=2.5)
-        self.stroke_button.pack(side="left", padx=2.5)
-        self.rect_button.pack(side="left", padx=2.5)
-        self.bomb_button.pack(side="left", padx=2.5)
+        self.arrows = tk.Frame(self.tools_frame)
+        self.undo = tk.PhotoImage(file="./assets/undo1.png")
+        self.undo_button = tk.Button(self.arrows, image=self.undo, command=self.canva.undo_action)
 
+        self.redo = tk.PhotoImage(file="./assets/redo1.png")
+        self.redo_button = tk.Button(self.arrows, image=self.redo, command=self.canva.redo_action)
+  
+        self.tools_frame.grid(column=0, row=4, padx=20)
 
+        self.arrows.pack(side="top")
+        self.undo_button.pack(side="left")
+        self.redo_button.pack(side="left")
+
+        self.bomb_button.pack(side="top", pady=2.5)
+        self.fill_button.pack(side="top", pady=2.5)
+        self.circle_button.pack(side="top", pady=2.5)
+        self.stroke_button.pack(side="top", pady=2.5)
+        self.rect_button.pack(side="top", pady=2.5)
 
     def select_file(self):
         filetypes = (('image files', '*.png'),('All files', '*.*'))
