@@ -53,13 +53,6 @@ class Home(ttk.Frame):
         solo_image.pack()
         solo_but.pack()
 
-        pixel_war = ttk.LabelFrame(self, text='PixelWar')
-        war_sub_title = ttk.Label(pixel_war, text='play against the strongest !')
-        war_image = ttk.Label(pixel_war, image=self.war_img)
-        war_but = ttk.Button(pixel_war, text='battle !', command=lambda : showerror(title="PixelWar", message="Option non disponible pour le moment !"))
-        war_sub_title.pack()
-        war_image.pack()
-        war_but.pack()
 
         Pixocial = ttk.LabelFrame(self, text='Pixocial')
         social_sub_title = ttk.Label(Pixocial, text='surf in to the other creation !')
@@ -71,12 +64,11 @@ class Home(ttk.Frame):
 
 
 
-        pixel_solo.grid(row=1, column=0, sticky='nsew', padx=50, pady=40)
-        pixel_war.grid(row=1, column=1, sticky='nsew', padx=50, pady=40)
-        Pixocial.grid(row=2, column=0, columnspan=2, sticky='nsew', padx=250, pady=40)
+        pixel_solo.grid(row=1, column=0, sticky='nsew', padx=250, pady=40)
+        Pixocial.grid(row=2, column=0, sticky='nsew', padx=250, pady=40)
 
         self.grid_columnconfigure((0, 1), weight=1)  
-        self.grid_rowconfigure((0, 1, 2), weight=1)
+        self.grid_rowconfigure((0, 1), weight=1)
 
 
 
